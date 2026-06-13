@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You ❤️</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Great+Vibes&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background-color: #0a0010;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Canvas for floating hearts and particles */
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Audio Controls */
+        .audio-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            color: #ff4d85;
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px rgba(255, 77, 133, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .audio-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 25px rgba(255, 77, 133, 0.6);
+        }
+
+        /* Main Container Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 100, 150, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(255, 0, 100, 0.2);
+            width: 100%;
+        }
+
+        .memories-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .memory-card {
+            background: rgba(255, 77, 133, 0.1);
+            border: 1px solid rgba(255, 77, 133, 0.3);
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            transition: transform 0.3s;
+        }
+
+        .memory-card:hover {
+            transform: scale(1.05);
+            background: rgba(255, 77, 133, 0.2);
+        }
+
+        /* Typography */
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3rem;
+            color: #ff4d85;
+            text-shadow: 0 0 15px #ff4d85;
+            margin-bottom: 20px;
+        }
+
+        .typewriter-text {
+            font-size: 1.2rem;
+            min-height: 80px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(45deg, #ff0844 0%, #ffb199 100%);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 8, 68, 0.5);
+            transition: all 0.3s ease;
+            margin: 10px;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(255, 8, 68, 0.8);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #ff4d85;
+            color: #ff4d85;
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 77, 133, 0.1);
+            box-shadow: 0 0 15px rgba(255, 77, 133, 0.4);
+        }
+
+        /* Button Container */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* Timer */
+        .timer-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .time-box {
+            background: rgba(255, 77, 133, 0.15);
+            border: 1px solid rgba(255, 77, 133, 0.4);
+            padding: 10px;
+            border-radius: 10px;
+            min-width: 60px;
+        }
+
+        .time-box span {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffb199;
+        }
+
+        .time-box p {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        /* Confetti Container */
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .confetti {
+            position: absolute;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); }
+        }
+
+        .pulse {
+            animation: pulse-animation 1.5s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop autoplay>
+    <source src="music.mp3" type="audio/mpeg">
+</audio>
+    <div class="audio-btn" onclick="toggleMusic()" id="musicBtn">🎵 Play Music</div>
+
+    <canvas id="canvas"></canvas>
+    
+    <div id="confetti-container"></div>
+
+    <div class="container">
+        
+        <div class="page active" id="page1">
+            <div class="glass-card">
+                <h1 style="font-size: 2.5rem;">Hello beautiful ✨</h1>
+                <div class="typewriter-text" id="typewriter"></div>
+                <button class="btn" id="continueBtn" style="display: none;" onclick="nextPage(2)">Continue ❤️</button>
+            </div>
+        </div>
+
+        <div class="page" id="page2">
+            <div class="glass-card">
+                <h2 style="margin-bottom: 20px; font-weight: 400;">Just a few things...</h2>
+                <div class="memories-container">
+                    <div class="memory-card">"You make my days brighter simply by existing." ☀️</div>
+                    <div class="memory-card">"You make me smile when I need it most." 😊</div>
+                    <div class="memory-card">"Somewhere along the way, you became incredibly special to me." 💫</div>
+                </div>
+                <button class="btn pulse" style="margin-top: 25px;" onclick="nextPage(3)">Next 🥺</button>
+            </div>
+        </div>
+
+        <div class="page" id="page3">
+            <div class="glass-card">
+                <h1 id="proposalMessage">Will you be mine? ❤️</h1>
+                <p id="subMessage" style="margin-bottom: 20px; font-size: 0.9rem; opacity: 0.8;">(Take your time, but say yes 😉)</p>
+                
+                <div class="button-group">
+                    <button class="btn pulse" id="yesBtn" onclick="acceptProposal()">YES ❤️</button>
+                    <button class="btn btn-outline" id="noBtn" onclick="rejectProposal()">NO 😭</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="page4">
+            <div class="glass-card">
+                <h1>She said YES! 🎉</h1>
+                <p style="font-size: 1.1rem; margin-bottom: 20px;">You just made me the happiest person alive ❤️</p>
+                
+                <p style="font-size: 0.9rem; opacity: 0.8;">Time since you made my life complete:</p>
+                <div class="timer-container">
+                    <div class="time-box">
+                        <span id="days">0</span>
+                        <p>Days</p>
+                    </div>
+                    <div class="time-box">
+                        <span id="hours">0</span>
+                        <p>Hours</p>
+                    </div>
+                    <div class="time-box">
+                        <span id="minutes">0</span>
+                        <p>Mins</p>
+                    </div>
+                    <div class="time-box">
+                        <span id="seconds">0</span>
+                        <p>Secs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. Music Control ---
+        const bgMusic = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('musicBtn');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicBtn.innerText = "🎵 Play Music";
+            } else {
+                bgMusic.play();
+                musicBtn.innerText = "⏸️ Pause Music";
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // --- 2. Page Navigation ---
+        function nextPage(pageNum) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById('page' + pageNum).classList.add('active');
+            
+            // Try to play music automatically on first interaction if not playing
+            if (!isPlaying && pageNum === 2) {
+                toggleMusic(); 
+            }
+        }
+
+        // --- 3. Typewriter Effect ---
+        const text = "There is something I have wanted to tell you for a long time...";
+        let i = 0;
+        function typeWriter() {
+            if (i < text.length) {
+                document.getElementById("typewriter").innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50);
+            } else {
+                document.getElementById("continueBtn").style.display = "inline-block";
+                document.getElementById("continueBtn").classList.add("pulse");
+            }
+        }
+        window.onload = typeWriter;
+
+        // --- 4. Proposal Logic (The "No" Button Loop) ---
+        const noMessages = [
+            "Are you absolutely sure? 🥺",
+            "Please think about it one more time 😭❤️",
+            "Okay but you are really special to me 🥹❤️",
+            "Don't do this to my heart! 💔",
+            "I'll buy you your favorite food! 🍕🍟",
+            "I promise to always make you smile! ✨",
+            "Please? Pretty please? 🥺🌸",
+            "Just click YES already! 😭❤️"
+        ];
+        
+        let noCount = 0;
+        
+        function rejectProposal() {
+            const proposalMessage = document.getElementById('proposalMessage');
+            const subMessage = document.getElementById('subMessage');
+            const yesBtn = document.getElementById('yesBtn');
+            const noBtn = document.getElementById('noBtn');
+
+            // Update text based on array
+            proposalMessage.innerText = noMessages[noCount % noMessages.length];
+            subMessage.innerText = "Click Yes to make me happy 🥺";
+            
+            // Make YES button slightly bigger and NO button slightly smaller each time
+            let scaleYes = 1 + (noCount * 0.1);
+            yesBtn.style.transform = `scale(${scaleYes})`;
+            yesBtn.style.margin = `${noCount * 5}px`;
+            
+            noCount++;
+        }
+
+        // --- 5. Success Logic & Timer ---
+        let startTime;
+        
+        function acceptProposal() {
+            nextPage(4);
+            triggerConfetti();
+            startTime = new Date().getTime();
+            setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const distance = now - startTime;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = days;
+            document.getElementById("hours").innerText = hours;
+            document.getElementById("minutes").innerText = minutes;
+            document.getElementById("seconds").innerText = seconds;
+        }
+
+        // --- 6. Confetti Explosion ---
+        function triggerConfetti() {
+            const container = document.getElementById('confetti-container');
+            const emojis = ['❤️', '🎉', '✨', '💖', '🌸'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+                confetti.style.fontSize = Math.random() * 1.5 + 1 + 'rem';
+                
+                container.appendChild(confetti);
+            }
+        }
+
+        // --- 7. Canvas Background Particles & Mouse Trail ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray = [];
+        let mouse = { x: null, y: null };
+
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+            // Create mouse trail particles
+            if(Math.random() > 0.5) {
+                particlesArray.push(new Particle(mouse.x, mouse.y, true));
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        class Particle {
+            constructor(x, y, isMouseTrail = false) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || canvas.height + Math.random() * 100;
+                this.size = Math.random() * 3 + 1;
+                this.speedY = Math.random() * 1.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 1;
+                this.opacity = Math.random() * 0.5 + 0.3;
+                this.isMouseTrail = isMouseTrail;
+                
+                if(this.isMouseTrail) {
+                    this.size = Math.random() * 5 + 2;
+                    this.speedY = (Math.random() - 0.5) * 2;
+                    this.life = 100;
+                }
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                
+                if (this.isMouseTrail) {
+                    this.life -= 2;
+                    this.opacity -= 0.02;
+                } else if (this.y < 0) {
+                    this.y = canvas.height;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                // Draw a simple heart shape or glowing circle
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 77, 133, ${this.opacity})`;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ff4d85';
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < 60; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                
+                // Remove dead mouse trail particles
+                if (particlesArray[i].isMouseTrail && particlesArray[i].life <= 0) {
+                    particlesArray.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+// --- Start music on the first interaction anywhere on the screen ---
+document.body.addEventListener('click', function() {
+    if (!isPlaying) {
+        bgMusic.play().then(() => {
+            isPlaying = true;
+            musicBtn.innerText = "⏸️ Pause Music";
+        }).catch((error) => {
+            // Browser still blocked it, wait for the next click
+            console.log("Autoplay prevented by browser.");
+        });
+    }
+}, { once: true }); // The { once: true } ensures this only triggers on the very first click
+    </script>
+</body>
+</html>
